@@ -20,6 +20,7 @@ export const listSession = async (req, res, next) => {
     const result = session.map((s) => ({
       id: s._id,
       roomId: s.roomId,
+      hostId: s.host.toString(),
       hostName: s.hostName,
       status: s.status,
       participantCount: s.participants.length || 0,
@@ -88,6 +89,7 @@ export const createSession = async (req, res, next) => {
         session: {
           id: session._id,
           roomId: session.roomId,
+          hostId: session.host.toString(),
           hostName: session.hostName,
           status: session.status,
           participantCount: session.participants.length,
@@ -140,6 +142,7 @@ export const JoinSession = async (req, res, next) => {
           session: {
             id: session._id,
             roomId: session.roomId,
+            hostId: session.host.toString(),
             hostName: session.hostName,
             status: session.status,
             participantCount: session.participants.length,
@@ -171,6 +174,7 @@ export const JoinSession = async (req, res, next) => {
         session: {
           id: session._id,
           roomId: session.roomId,
+          hostId: session.host.toString(),
           hostName: session.hostName,
           status: session.status,
           participantCount: session.participants.length,
@@ -208,6 +212,7 @@ export const getSession = async (req, res, next) => {
         session: {
           id: session._id,
           roomId: session.roomId,
+          hostId: session.host.toString(),
           hostName: session.hostName,
           status: session.status,
           participantCount: session.participants.length,

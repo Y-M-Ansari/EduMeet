@@ -11,18 +11,7 @@ let isDestroying = false;
 
 export const generateKitToken = async (roomId, userId, userName) => {
     if (!ZEGO_CONFIG.APP_ID) {
-        throw new Error('ZEGOCLOUD App Id not configured. Please set REACT_APP_ZEGO_APP_ID in your frontend env file.');
-    }
-
-    if (ZEGO_CONFIG.SERVER_SECRET) {
-        return ZegoUIKitPrebuilt.generateKitTokenForTest(
-            Number(ZEGO_CONFIG.APP_ID),
-            ZEGO_CONFIG.SERVER_SECRET,
-            String(roomId),
-            String(userId),
-            userName ? String(userName) : String(userId),
-            3600,
-        );
+        throw new Error('ZEGOCLOUD App Id not configured. Please set REACT_APP_ZEGO_APP_ID in the frontend env file.');
     }
 
     try {
@@ -30,7 +19,7 @@ export const generateKitToken = async (roomId, userId, userName) => {
         return resp?.data?.data?.token;
     } catch (error) {
         console.error('Failed to fetch zego token from server', error);
-        throw new Error('Failed to generate zego token. Add REACT_APP_ZEGO_SERVER_SECRET to the frontend env or implement the backend /api/zego/token endpoint.');
+        throw new Error('Failed to generate zego token. The backend token endpoint is not available in the deployed environment.');
     }
 }
 
@@ -131,8 +120,11 @@ export const joinRoom = async(roomId,userId,userName,container,onJoinCallback,on
             showMyCameraToggleButton:true,
             showMyMicrophoneToggleButton:true,
             showAudioVideoSettingsButton:true,
+            showScreenSharingButton:true,
+            
             showTextChat:true,
             showUserList:true,
+            
             onJoinRoom: () => {
                 userHasJoined = true;
                 if(onJoinCallback && typeof onJoinCallback === 'function'){

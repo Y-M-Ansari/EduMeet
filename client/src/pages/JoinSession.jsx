@@ -171,6 +171,7 @@ const JoinSession = () => {
             <ParticipantsList
               participants={sessionInfo.participants}
               hostName={sessionInfo.hostName}
+              hostId={sessionInfo.hostId}
             />
           </div>
         </div>

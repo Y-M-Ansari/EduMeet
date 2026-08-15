@@ -2,7 +2,7 @@ import React from 'react'
 import {FaUsers} from 'react-icons/fa'
 import { APP_CONFIG } from '../../utils/constants'
 
-const ParticipantsList = ({participants,hostName}) => {
+const ParticipantsList = ({participants, hostName, hostId}) => {
 
   if(!participants || participants.length === 0){
     return(
@@ -25,8 +25,22 @@ const ParticipantsList = ({participants,hostName}) => {
   }
 
 
-  const hostParticipants = participants.filter((p) => p.userName === hostName);
-  const otherParticipants = participants.filter((p) => p.userName !== hostName)
+  const hostParticipants = participants.filter((p) => {
+    const participantUserId = p.userId?.toString?.() ?? p.user_id?.toString?.();
+    const hostUserId = hostId?.toString?.();
+
+    if (hostUserId && participantUserId) {
+      return participantUserId === hostUserId;
+    }
+
+    return p.userName === hostName;
+  });
+
+  const otherParticipants = participants.filter((p) => !hostParticipants.some((hostP) => {
+    const participantUserId = p.userId?.toString?.() ?? p.user_id?.toString?.();
+    const hostParticipantUserId = hostP.userId?.toString?.() ?? hostP.user_id?.toString?.();
+    return participantUserId && hostParticipantUserId && participantUserId === hostParticipantUserId;
+  }));
   return (
     <div className='bg-white rounded-xl shadow-lg p-6 border border-gray-100 sticky top-4'>
        <div className='flex items-center mb-4'>

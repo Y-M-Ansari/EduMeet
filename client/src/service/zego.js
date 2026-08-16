@@ -110,6 +110,9 @@ export const joinRoom = async(roomId,userId,userName,container,onJoinCallback,on
 
     //join room with prebuild ui 
     try {
+        // Detect if device is mobile
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
         zp.joinRoom({
             container:container,
             scenario:{
@@ -121,9 +124,17 @@ export const joinRoom = async(roomId,userId,userName,container,onJoinCallback,on
             showMyMicrophoneToggleButton:true,
             showAudioVideoSettingsButton:true,
             showScreenSharingButton:true,
+            screenSharingConfig:{
+                maxScreenShareCount: 1,
+                startSharingScreenTextEN: 'Share Screen',
+                stopSharingScreenTextEN: 'Stop Sharing',
+            },
             
             showTextChat:true,
             showUserList:true,
+            // Mobile optimizations
+            layout: isMobile ? 'Gallery' : 'Sidebar',
+            videoResolutionDefault: isMobile ? '360p' : '720p',
             
             onJoinRoom: () => {
                 userHasJoined = true;

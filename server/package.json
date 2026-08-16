@@ -1,7 +1,7 @@
 {
   "name": "live-class-server",
   "version": "1.0.0",
-  "description": "Backend live class mern app",
+  "description": "Backend EduMeet mern app",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

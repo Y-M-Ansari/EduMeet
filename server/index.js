@@ -30,7 +30,7 @@ app.use(express.urlencoded({extended:true}))
 app.get('/api/health', (req,res) => {
     res.json({
         status: 'OK',
-        message:'Live class server is running',
+        message:'EduMeet server is running',
         timestamp:new Date().toISOString()
     })
 })

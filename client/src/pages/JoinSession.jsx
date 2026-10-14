@@ -42,12 +42,10 @@ const JoinSession = () => {
 
     //check if room id is exits in URL PARAMS 
     useEffect(() => {
-  const urlRoomId = searchParams.get("roomId");
-
-    if (urlRoomId) {
-      setRoomId(urlRoomId.trim());
-    }
-  }, [searchParams]);
+      const urlRoomId = searchParams.get('roomId');
+      if(urlRoomId){}
+      setRoomId(urlRoomId)
+    },[searchParams])
 
 
     //handle input change

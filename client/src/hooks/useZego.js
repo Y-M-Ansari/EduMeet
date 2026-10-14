@@ -12,21 +12,43 @@ export const useZego = () => {
   const joinedRoomIdRef = useRef(null);
   const isJoiningRef = useRef(false);
   const isLeavingRef = useRef(false);
+
   const { user } = useAuth();
 
   const joinZegoRoom = useCallback(
     async (roomId) => {
-      if (joinedRoomIdRef.current === roomId && isJoined) {
+      const normalizedRoomId = String(roomId || "").trim();
+
+      // Validate room ID
+      if (!normalizedRoomId) {
+        const errorMessage = "Room ID is required.";
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+
+      // Avoid joining the same room twice
+      if (joinedRoomIdRef.current === normalizedRoomId) {
         return { success: true };
       }
 
-      if (isJoiningRef.current) {
-        return { success: false, error: "Join room in process" };
+      // Prevent concurrent join attempts
+      if (isJoiningRef.current || isLeavingRef.current) {
+        return {
+          success: false,
+          error: "A room operation is already in progress.",
+        };
       }
 
-      if (!roomId) {
-        const errorMessage = "Room Id is required";
+      // Validate authenticated user
+      const userId = user?.id || user?._id;
+      const userName = user?.name;
+
+      if (!userId || !userName) {
+        const errorMessage =
+          "User ID or name is missing. Please log in again.";
+
         setError(errorMessage);
+
         return { success: false, error: errorMessage };
       }
 
@@ -35,45 +57,43 @@ export const useZego = () => {
       setError(null);
 
       try {
-        //wait for container to be avaible with retry mechanism
+        // Wait for the video container to become available
         let retries = 0;
         const maxRetries = 30;
+
         while (!containerRef.current && retries < maxRetries) {
           await new Promise((resolve) => setTimeout(resolve, 100));
           retries++;
         }
+
         if (!containerRef.current) {
           throw new Error(
-            "video container not ready after waiting. Please the page",
+            "Video container is not ready. Please refresh the page and try again."
           );
         }
 
         const container = containerRef.current;
-        if (container.offsetWidth === 0 || container.offsetHeight === 0) {
-          console.warn("Container has zero deminsions, waiting a bot more...");
-          await new Promise((resolve) => setTimeout(resolve, 500));
+
+        // Check container dimensions
+        if (
+          container.offsetWidth === 0 ||
+          container.offsetHeight === 0
+        ) {
+          console.warn(
+            "Video container has zero dimensions. Check its CSS and visibility."
+          );
         }
 
-        const userId = user?.id || user?._id;
-
-if (!userId) {
-  console.error("User ID is missing:", user);
-
-  throw new Error("User ID is missing. Please log in again.");
-}
-
-if (!roomId) {
-  throw new Error("Room ID is missing.");
-}
-
-if (!user?.name) {
-  throw new Error("User name is missing.");
-}
+        console.log("Joining ZEGO room:", {
+          roomId: normalizedRoomId,
+          userId: String(userId),
+          userName,
+        });
 
         await joinRoom(
-          String(roomId).trim().toUpperCase(),
+          normalizedRoomId,
           String(userId),
-          user.name,
+          userName,
           container,
           () => {
             setUserHasJoined(true);
@@ -82,45 +102,58 @@ if (!user?.name) {
             setUserHasJoined(false);
           }
         );
+
         setIsJoined(true);
-        joinedRoomIdRef.current = roomId;
-        return {success:true}
+        joinedRoomIdRef.current = normalizedRoomId;
+
+        return { success: true };
       } catch (error) {
-        console.error("failed to join zego room", error);
+        console.error("Failed to join ZEGO room:", error);
+
         const errorMessage =
-          error.message ||
-          "Failed to join room. Please check you camera.microphone permission and try again";
+          error?.message ||
+          "Failed to join the room. Check your camera and microphone permissions.";
+
         setError(errorMessage);
         setIsJoined(false);
         setUserHasJoined(false);
         joinedRoomIdRef.current = null;
-        return { success: false, error: errorMessage };
+
+        return {
+          success: false,
+          error: errorMessage,
+        };
       } finally {
         setLoading(false);
         isJoiningRef.current = false;
       }
     },
-    [user],
+    [user]
   );
 
   const leaveZegoRoom = useCallback(async () => {
-    if (isLeavingRef.current || !joinedRoomIdRef.current) {
+    if (isLeavingRef.current || isJoiningRef.current) {
+      return;
+    }
+
+    if (!joinedRoomIdRef.current) {
       return;
     }
 
     isLeavingRef.current = true;
+
     try {
-      leaveRoom(() => {
+      await leaveRoom(() => {
         setUserHasJoined(false);
       });
+
       setIsJoined(false);
       setUserHasJoined(false);
       joinedRoomIdRef.current = null;
     } catch (error) {
-      console.error("Error leaving zego room", error);
-      setIsJoined(false);
-      setUserHasJoined(false);
-      joinedRoomIdRef.current = null;
+      console.error("Error leaving ZEGO room:", error);
+
+      setError(error?.message || "Failed to leave the room.");
     } finally {
       isLeavingRef.current = false;
     }
@@ -128,28 +161,24 @@ if (!user?.name) {
 
   useEffect(() => {
     return () => {
-      if (joinedRoomIdRef.current && !isLeavingRef.current) {
+      if (joinedRoomIdRef.current) {
         try {
           leaveRoom();
         } catch (error) {
-          console.error("Error in cleaup leave room", error);
+          console.error("Error cleaning up ZEGO room:", error);
         }
-      joinedRoomIdRef.current = null;
-          isJoiningRef.current = false;
-          isLeavingRef.current = false;
+
+        joinedRoomIdRef.current = null;
       }
     };
   }, []);
 
   return {
-    //state
     isJoined,
     userHasJoined,
     error,
     loading,
     containerRef,
-
-    //Methods
     joinZegoRoom,
     leaveZegoRoom,
   };

@@ -8,7 +8,6 @@ import sessionRoute from './routes/sessionRoute.js'
 import zegoRoute from './routes/zegoRoute.js'
 
 
-
 dotenv.config();
 
 
@@ -20,6 +19,21 @@ const corsOption = {
     origin: process.env.CLIENT_URL,
     credentials:true
 }
+
+/* we should use  below start function to ensure that server starts after database connection . 
+
+const startServer = async () => {
+    await connectDb();
+
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+};
+
+startServer();
+*/
+
+// we should not use connectDb directly like below 
 
 connectDb();
 

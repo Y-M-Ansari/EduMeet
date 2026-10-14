@@ -113,11 +113,11 @@ export const joinRoom = async(roomId,userId,userName,container,onJoinCallback,on
         // Detect if device is mobile
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
-        zp.joinRoom({
-            container:container,
-            scenario:{
-                mode:ZegoUIKitPrebuilt.GroupCall,
-            },
+        await zp.joinRoom({
+        container: container,
+        scenario: {
+            mode: ZegoUIKitPrebuilt.GroupCall,
+        },
             turnOnCameraWhenJoining:hasPermission,
             turnOnMicrophoneWhenJoining:hasPermission,
             showMyCameraToggleButton:true,
@@ -149,7 +149,17 @@ export const joinRoom = async(roomId,userId,userName,container,onJoinCallback,on
                 }
             },
             onError: (error) => {
-                console.error('ZEGO room error', error)
+            console.error("ZEGO room error:", error);
+
+            console.error(
+                "Room ID:",
+                roomId
+            );
+
+            console.error(
+                "User ID:",
+                userId
+            );
             },
         });
     } catch (error) {

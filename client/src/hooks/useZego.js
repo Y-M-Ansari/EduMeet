@@ -54,19 +54,33 @@ export const useZego = () => {
           await new Promise((resolve) => setTimeout(resolve, 500));
         }
 
+        const userId = user?.id || user?._id;
+
+if (!userId) {
+  console.error("User ID is missing:", user);
+
+  throw new Error("User ID is missing. Please log in again.");
+}
+
+if (!roomId) {
+  throw new Error("Room ID is missing.");
+}
+
+if (!user?.name) {
+  throw new Error("User name is missing.");
+}
+
         await joinRoom(
-          roomId,
-          user.id,
+          String(roomId).trim().toUpperCase(),
+          String(userId),
           user.name,
           container,
           () => {
-            //onJoinCall
             setUserHasJoined(true);
           },
           () => {
-            //onLeaveCall
             setUserHasJoined(false);
-          },
+          }
         );
         setIsJoined(true);
         joinedRoomIdRef.current = roomId;

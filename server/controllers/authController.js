@@ -12,7 +12,7 @@ export const register = async (req,res,next) => {
 
         const userExits = await User.findOne({email});
         if(userExits){
-            return res.status(400).json({
+            return res.status(409).json({
                 success:false,
                 error:'User already exists with this email'
             })
@@ -62,13 +62,13 @@ export const login = async (req,res,next) => {
                  //check if password matche
 
 
-                 const isPasswordMatch = await user.matchPassword(password);
-                 if(!isPasswordMatch){
-                    return res.status(401).json({
-                        success:false,
-                        error:'Invalid email or password'
-                    })
-                 }
+        const isPasswordMatch = await user.matchPassword(password);
+        if(!isPasswordMatch){
+        return res.status(401).json({
+            success:false,
+            error:'Invalid email or password'
+        })
+        }
 
 
 
